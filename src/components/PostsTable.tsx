@@ -21,7 +21,7 @@ export default class PostsTable extends React.Component<Props, State> {
 		const { style: additionalStyle } = this.props;
 		return (
 			<div style={{ ...styles.container, ...additionalStyle }}>
-				{this.props.posts.map((post) => <div>{post.text}</div>)}
+				{this.props.posts.map((post) => <div key={post.id}>{post.text}</div>)}
 			</div>
 		);
 	}
