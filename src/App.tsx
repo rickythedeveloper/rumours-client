@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import logo from './logo.svg';
 import './App.css';
 
 function App(): JSX.Element {
+	const [apiTestResult, setAPITestResult] = useState<{testJson: string}>({ testJson: 'not fetched yet' });
+
+	useEffect(() => {
+		axios.get<{testJson: string}>('https://rtd-rumours-server.herokuapp.com/apitest')
+			.then((result) => {
+				setAPITestResult(result.data);
+			});
+	});
+
 	return (
 		<div className="App">
 			<header className="App-header">
@@ -22,6 +32,11 @@ function App(): JSX.Element {
 				>
 					Learn React
 				</a>
+				<p>
+					API Test result:
+					{' '}
+					{apiTestResult.testJson}
+				</p>
 			</header>
 		</div>
 	);
