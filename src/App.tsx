@@ -61,6 +61,7 @@ export default class App extends React.Component<Props, State> {
 
 		return (
 			<div className="App" style={{ ...styles.container, ...this.props.style }}>
+				<h1>rumours</h1>
 				<ChannelDropdown channels={this.state.channels} setChannel={(id) => { this.setState({ selectedPostID: id }); }} />
 				<PostsTable posts={shownPosts} />
 			</div>
