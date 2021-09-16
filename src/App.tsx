@@ -1,11 +1,11 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, FormEventHandler } from 'react';
 import axios from 'axios';
-import logo from './logo.svg';
 import './App.css';
 import { Post, Channel } from './models/tables';
-import { GetResponse } from './models/api';
+import { GetResponse, PostResponse } from './models/api';
 import PostsTable from './components/PostsTable';
 import ChannelDropdown from './components/ChannelDropdown';
+import { SERVER_URL } from './constants';
 
 interface Props {
 	style?: CSSProperties;
@@ -13,11 +13,13 @@ interface Props {
 interface State {
 	posts: Post[];
 	channels: Channel[];
-	selectedPostID?: number;
+	selectedChannelID?: number;
+	draftText: string;
 }
 const DEFAULT_STATE: State = {
 	posts: [],
 	channels: [],
+	draftText: '',
 };
 
 const styles: {[component: string]: React.CSSProperties} = {
@@ -30,7 +32,49 @@ const styles: {[component: string]: React.CSSProperties} = {
 		justifyContent: 'center',
 		color: 'white',
 	},
+	postDraftSection: {
+		display: 'flex',
+		flexDirection: 'row',
+	},
+	draftTextbox: {
+		flex: '1 1 auto',
+	},
+	sendButton: {
+		flex: '0 0 50px',
+	},
 };
+
+const submitRumour = async (text: string, channelID: number, onSuccess: (newPost: Post) => void, onFailure: (error: unknown) => void): Promise<void> => {
+	const requestBody = { text, channel_id: channelID };
+	await axios.post<PostResponse<Post>>(`${SERVER_URL}/posts`, requestBody)
+		.then((newPost) => {
+			if (newPost.data.isSuccessful) {
+				onSuccess(newPost.data.data);
+			} else {
+				onFailure(newPost.data.error);
+			}
+		})
+		.catch(onFailure);
+};
+
+const getPosts = async (): Promise<Post[]> => {
+	const result = await axios.get<GetResponse<Post[]>>(`${SERVER_URL}/posts`);
+	if (result.data.isSuccessful) {
+		const posts = result.data.data;
+		return posts;
+	}
+	throw new Error(result.data.error);
+};
+
+const getChannels = async (): Promise<Channel[]> => {
+	const result = await axios.get<GetResponse<Channel[]>>(`${SERVER_URL}/channels`);
+	if (result.data.isSuccessful) {
+		const posts = result.data.data;
+		return posts;
+	}
+	throw new Error(result.data.error);
+};
+
 export default class App extends React.Component<Props, State> {
 	constructor(props: Props) {
 		super(props);
@@ -38,32 +82,50 @@ export default class App extends React.Component<Props, State> {
 	}
 
 	componentDidMount(): void {
-		axios.get<GetResponse<Post[]>>('https://rtd-rumours-server.herokuapp.com/posts')
-			.then((result) => {
-				if (result.data.isSuccessful) {
-					const posts = result.data.data;
-					this.setState({ posts });
-				}
-			})
-			.catch((error) => { throw error; });
-		axios.get<GetResponse<Channel[]>>('https://rtd-rumours-server.herokuapp.com/channels')
-			.then((result) => {
-				if (result.data.isSuccessful) {
-					const channels = result.data.data;
-					this.setState({ channels });
-				}
-			})
-			.catch((error) => { throw error; });
+		getPosts()
+			.then((posts) => this.setState({ posts }))
+			.catch((error) => { console.log(error); });
+		getChannels()
+			.then((channels) => this.setState({ channels }))
+			.catch((error) => { console.log(error); });
 	}
 
 	render(): JSX.Element {
-		const shownPosts = this.state.posts.filter((post) => post.channel_id === this.state.selectedPostID);
+		const shownPosts = this.state.posts.filter((post) => post.channel_id === this.state.selectedChannelID);
 
 		return (
 			<div className="App" style={{ ...styles.container, ...this.props.style }}>
 				<h1>rumours</h1>
-				<ChannelDropdown channels={this.state.channels} setChannel={(id) => { this.setState({ selectedPostID: id }); }} />
+				<ChannelDropdown channels={this.state.channels} setChannel={(id) => { this.setState({ selectedChannelID: id }); }} />
 				<PostsTable posts={shownPosts} />
+
+				<div style={styles.postDraftSection}>
+					<input
+						type="text"
+						style={styles.draftTextbox}
+						value={this.state.draftText}
+						onChange={(e) => this.setState({ draftText: e.target.value })}
+					/>
+					<button
+						type="button"
+						style={styles.sendButton}
+						onClick={async () => {
+							if (this.state.selectedChannelID === undefined) return;
+							await submitRumour(this.state.draftText, this.state.selectedChannelID,
+								async () => {
+									this.setState({ draftText: '' });
+
+									getPosts()
+										.then((posts) => this.setState({ posts }))
+										.catch((error) => { console.log(error); });
+								}, (error) => {
+									console.log(error);
+								});
+						}}
+					>
+						Send
+					</button>
+				</div>
 			</div>
 		);
 	}
