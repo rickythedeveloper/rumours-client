@@ -15,6 +15,7 @@ interface State {
 	posts: Post[];
 	channels: Channel[];
 	selectedChannelID?: number;
+	hoveredChannelID?: number;
 	draftText: string;
 }
 const DEFAULT_STATE: State = {
@@ -139,7 +140,8 @@ export default class App extends React.Component<Props, State> {
 	}
 
 	render(): JSX.Element {
-		const shownPosts = this.state.posts.filter((post) => post.channel_id === this.state.selectedChannelID);
+		const shownChannelID = this.state.hoveredChannelID || this.state.selectedChannelID;
+		const shownPosts = this.state.posts.filter((post) => post.channel_id === shownChannelID);
 
 		return (
 			<div className="App" style={{ ...styles.container, ...this.props.style }}>
@@ -154,6 +156,7 @@ export default class App extends React.Component<Props, State> {
 						getElement={(channel, isHovered) => channelCellElement(channel, isHovered)}
 						getTitle={(channel) => channel.name}
 						onSelect={(channel) => { this.setState({ selectedChannelID: channel.id }); }}
+						onHover={(channel) => { this.setState({ hoveredChannelID: channel.id }); }}
 					/>
 					<input
 						type="text"
@@ -165,8 +168,8 @@ export default class App extends React.Component<Props, State> {
 						type="button"
 						style={styles.sendButton}
 						onClick={async () => {
-							if (this.state.selectedChannelID === undefined) return;
-							await submitRumour(this.state.draftText, this.state.selectedChannelID,
+							if (shownChannelID === undefined) return;
+							await submitRumour(this.state.draftText, shownChannelID,
 								async () => {
 									this.setState({ draftText: '' });
 
