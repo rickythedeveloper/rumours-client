@@ -27,22 +27,23 @@ const DEFAULT_STATE: State = {
 const styles: {[component: string]: React.CSSProperties} = {
 	container: {
 		backgroundColor: '#282c34',
-		minHeight: '100vh',
+		height: '100vh',
+		boxSizing: 'border-box',
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
 		justifyContent: 'center',
 		color: 'white',
+		padding: 100,
+	},
+	postTable: {
+		flex: '1 1 50px',
+		overflow: 'scroll',
 	},
 	postDraftSection: {
+		flex: '0 0 auto',
 		display: 'flex',
 		flexDirection: 'row',
-	},
-	draftTextbox: {
-		flex: '1 1 auto',
-	},
-	sendButton: {
-		flex: '0 0 50px',
 	},
 };
 
@@ -147,7 +148,7 @@ export default class App extends React.Component<Props, State> {
 			<div className="App" style={{ ...styles.container, ...this.props.style }}>
 
 				<h1>rumours</h1>
-				<PostsTable posts={shownPosts} />
+				<PostsTable posts={shownPosts} style={{ ...styles.postTable }} />
 
 				<div style={styles.postDraftSection}>
 					<SearchDropdown<Channel>
@@ -160,13 +161,11 @@ export default class App extends React.Component<Props, State> {
 					/>
 					<input
 						type="text"
-						style={styles.draftTextbox}
 						value={this.state.draftText}
 						onChange={(e) => this.setState({ draftText: e.target.value })}
 					/>
 					<button
 						type="button"
-						style={styles.sendButton}
 						onClick={async () => {
 							if (shownChannelID === undefined) return;
 							await submitRumour(this.state.draftText, shownChannelID,
