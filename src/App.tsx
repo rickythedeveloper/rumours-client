@@ -83,8 +83,14 @@ const getChannels = async (): Promise<Channel[]> => {
 
 const getChannelsOnSearch = (searchString: string, channels: Channel[]): Channel[] => channels;
 
-const channelCellElement = (channel: Channel): JSX.Element => (
-	<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+const channelCellElement = (channel: Channel, isHovered: boolean): JSX.Element => (
+	<div style={{
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		backgroundColor: isHovered ? '#666' : '#333',
+	}}
+	>
 		<div>{channel.name}</div>
 		<div style={{ color: '#aaa' }}>
 			#
@@ -121,10 +127,9 @@ export default class App extends React.Component<Props, State> {
 					<SearchDropdown<Channel>
 						getItemsData={(search) => getChannelsOnSearch(search, this.state.channels)}
 						getItemKey={(channel) => channel.id}
-						getElement={(channel) => channelCellElement(channel)}
+						getElement={(channel, isHovered) => channelCellElement(channel, isHovered)}
 						getTitle={(channel) => channel.name}
 						onSelect={(channel) => { this.setState({ selectedChannelID: channel.id }); }}
-						hoverHighlightColor="#777"
 					/>
 					<input
 						type="text"

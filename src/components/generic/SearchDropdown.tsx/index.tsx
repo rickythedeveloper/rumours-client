@@ -3,17 +3,15 @@ import React, { CSSProperties } from 'react';
 interface Props<T> {
 	getItemsData: (searchString: string) => T[];
 	getItemKey: (itemData: T, index: number) => string | number;
-	getElement: (itemData: T, index: number) => JSX.Element;
+	getElement: (itemData: T, isHovered: boolean, index: number) => JSX.Element;
 	getTitle: (itemData: T, index: number) => string;
 	onHover?: (itemData: T, index: number) => void;
 	onSelect?: (itemdata: T, index: number) => void;
-	hoverHighlightColor?: string;
 	style?: CSSProperties;
 }
 interface State<T> {
 	searchString: string;
 	itemsData: T[];
-	items: JSX.Element[];
 	hoverIndex?: number;
 	isShown: boolean;
 }
@@ -35,7 +33,6 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 		const DEFAULT_STATE: State<T> = {
 			searchString: '',
 			itemsData: [],
-			items: [],
 			isShown: false,
 		};
 		this.state = DEFAULT_STATE;
@@ -43,12 +40,14 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 
 	updateItems(searchString: string): void {
 		const itemsData = this.props.getItemsData(searchString);
-		const items = itemsData.map((itemData, index) => this.props.getElement(itemData, index));
-		this.setState({ searchString, items, itemsData });
+		this.setState({ searchString, itemsData });
 	}
 
 	render(): JSX.Element {
 		const { style: additionalStyle } = this.props;
+		const itemElements = this.state.itemsData.map((itemData, index) => (
+			this.props.getElement(itemData, this.state.hoverIndex === index, index)
+		));
 		return (
 			<div style={{ ...styles.container, ...additionalStyle }}>
 				<input
@@ -76,16 +75,13 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 						...styles.optionsContainer,
 					}}
 				>
-					{this.state.items.map((item, index) => {
+					{itemElements.map((item, index) => {
 						const itemData = this.state.itemsData[index];
 						return (
 							/* eslint-disable jsx-a11y/click-events-have-key-events */
 							/* eslint-disable jsx-a11y/no-static-element-interactions */
 							<div
 								key={this.props.getItemKey(itemData, index)}
-								style={{
-									backgroundColor: this.state.hoverIndex === index ? this.props.hoverHighlightColor || 'red' : undefined,
-								}}
 								onMouseEnter={() => {
 									this.setState({ hoverIndex: index });
 									if (this.props.onHover) this.props.onHover(itemData, index);
@@ -98,9 +94,9 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 							>
 								{item}
 							</div>
+							/* eslint-enable jsx-a11y/click-events-have-key-events */
+							/* eslint-enable jsx-a11y/no-static-element-interactions */
 						);
-						/* eslint-enable jsx-a11y/click-events-have-key-events */
-						/* eslint-enable jsx-a11y/no-static-element-interactions */
 					})}
 				</div>
 			</div>
