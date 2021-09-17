@@ -81,6 +81,18 @@ const getChannels = async (): Promise<Channel[]> => {
 	throw new Error(result.data.error);
 };
 
+const getChannelsOnSearch = (searchString: string, channels: Channel[]): Channel[] => channels;
+
+const channelCellElement = (channel: Channel): JSX.Element => (
+	<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+		<div>{channel.name}</div>
+		<div style={{ color: '#aaa' }}>
+			#
+			{channel.id}
+		</div>
+	</div>
+);
+
 export default class App extends React.Component<Props, State> {
 	constructor(props: Props) {
 		super(props);
@@ -101,25 +113,19 @@ export default class App extends React.Component<Props, State> {
 
 		return (
 			<div className="App" style={{ ...styles.container, ...this.props.style }}>
-				<SearchDropdown<Channel>
-					getItemsData={(search) => this.state.channels}
-					getItemKey={(itemData, index) => itemData.id}
-					getElement={(itemData, index) => (
-						<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-							<div>{itemData.name}</div>
-							<div style={{ color: '#aaa' }}>
-								#
-								{itemData.id}
-							</div>
-						</div>
-					)}
-					hoverHighlightColor="#777"
-				/>
+
 				<h1>rumours</h1>
 				<PostsTable posts={shownPosts} />
 
 				<div style={styles.postDraftSection}>
-					<ChannelDropdown channels={this.state.channels} setChannel={(id) => { this.setState({ selectedChannelID: id }); }} />
+					<SearchDropdown<Channel>
+						getItemsData={(search) => getChannelsOnSearch(search, this.state.channels)}
+						getItemKey={(channel) => channel.id}
+						getElement={(channel) => channelCellElement(channel)}
+						getTitle={(channel) => channel.name}
+						onSelect={(channel) => { this.setState({ selectedChannelID: channel.id }); }}
+						hoverHighlightColor="#777"
+					/>
 					<input
 						type="text"
 						style={styles.draftTextbox}

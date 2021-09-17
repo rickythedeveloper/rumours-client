@@ -4,7 +4,9 @@ interface Props<T> {
 	getItemsData: (searchString: string) => T[];
 	getItemKey: (itemData: T, index: number) => string | number;
 	getElement: (itemData: T, index: number) => JSX.Element;
+	getTitle: (itemData: T, index: number) => string;
 	onHover?: (itemData: T, index: number) => void;
+	onSelect?: (itemdata: T, index: number) => void;
 	hoverHighlightColor?: string;
 	style?: CSSProperties;
 }
@@ -61,7 +63,11 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 						this.updateItems(searchString);
 						this.setState({ isShown: true });
 					}}
-					onBlur={() => { this.setState({ isShown: false }); }}
+					onBlur={() => {
+						setTimeout(() => {
+							this.setState({ isShown: false });
+						}, 300);
+					}}
 				/>
 				<div
 					className="search-dropdown-options-container"
@@ -73,6 +79,8 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 					{this.state.items.map((item, index) => {
 						const itemData = this.state.itemsData[index];
 						return (
+							/* eslint-disable jsx-a11y/click-events-have-key-events */
+							/* eslint-disable jsx-a11y/no-static-element-interactions */
 							<div
 								key={this.props.getItemKey(itemData, index)}
 								style={{
@@ -83,10 +91,16 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 									if (this.props.onHover) this.props.onHover(itemData, index);
 								}}
 								onMouseLeave={() => { if (this.state.hoverIndex === index) this.setState({ hoverIndex: undefined }); }}
+								onClick={() => {
+									if (this.props.onSelect) this.props.onSelect(itemData, index);
+									this.setState({ searchString: this.props.getTitle(itemData, index) });
+								}}
 							>
 								{item}
 							</div>
 						);
+						/* eslint-enable jsx-a11y/click-events-have-key-events */
+						/* eslint-enable jsx-a11y/no-static-element-interactions */
 					})}
 				</div>
 			</div>
