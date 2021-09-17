@@ -98,8 +98,17 @@ export default class App extends React.Component<Props, State> {
 			<div className="App" style={{ ...styles.container, ...this.props.style }}>
 				<SearchDropdown<{stuff: number}>
 					getItemsData={(search) => Array(10).fill({ stuff: 1 })}
-					getItemKey={(itemData) => itemData.stuff}
-					getElement={(itemData) => <div>{itemData.stuff}</div>}
+					getItemKey={(itemData, index) => index}
+					getElement={(itemData, index) => (
+						<div>
+							{itemData.stuff}
+							{' '}
+							at
+							{' '}
+							{index}
+						</div>
+					)}
+					hoverHighlightColor="#777777"
 				/>
 				<h1>rumours</h1>
 				<PostsTable posts={shownPosts} />
