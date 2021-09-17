@@ -61,7 +61,7 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 						this.updateItems(searchString);
 						this.setState({ isShown: true });
 					}}
-					onBlur={(e) => { this.setState({ isShown: false }); }}
+					onBlur={() => { this.setState({ isShown: false }); }}
 				/>
 				<div
 					className="search-dropdown-options-container"

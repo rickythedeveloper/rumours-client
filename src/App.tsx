@@ -1,4 +1,4 @@
-import React, { CSSProperties, FormEventHandler } from 'react';
+import React, { CSSProperties } from 'react';
 import axios from 'axios';
 import './App.css';
 import { Post, Channel } from './models/tables';
@@ -45,7 +45,12 @@ const styles: {[component: string]: React.CSSProperties} = {
 	},
 };
 
-const submitRumour = async (text: string, channelID: number, onSuccess: (newPost: Post) => void, onFailure: (error: unknown) => void): Promise<void> => {
+const submitRumour = async (
+	text: string,
+	channelID: number,
+	onSuccess: (newPost: Post) => void,
+	onFailure: (error: unknown) => void,
+): Promise<void> => {
 	const requestBody = { text, channel_id: channelID };
 	await axios.post<PostResponse<Post>>(`${SERVER_URL}/posts`, requestBody)
 		.then((newPost) => {
