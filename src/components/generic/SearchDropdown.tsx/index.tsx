@@ -20,6 +20,11 @@ const styles: {[component: string]: React.CSSProperties} = {
 	container: {
 		position: 'relative',
 	},
+	textbox: {
+		borderRadius: 3,
+		border: 0,
+		padding: 3,
+	},
 	optionsContainer: {
 		position: 'absolute',
 		backgroundColor: 'black',
@@ -51,6 +56,7 @@ export default class SearchDropdown<T> extends React.Component<Props<T>, State<T
 		return (
 			<div style={{ ...styles.container, ...additionalStyle }}>
 				<input
+					style={styles.textbox}
 					type="text"
 					value={this.state.searchString}
 					onChange={(e) => {
