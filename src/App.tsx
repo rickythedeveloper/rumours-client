@@ -81,7 +81,31 @@ const getChannels = async (): Promise<Channel[]> => {
 	throw new Error(result.data.error);
 };
 
-const getChannelsOnSearch = (searchString: string, channels: Channel[]): Channel[] => channels;
+const getPostCountInChannel = (channelID: number, posts: Post[]): number => {
+	let count = 0;
+	posts.forEach((post) => {
+		if (post.channel_id === channelID) count += 1;
+	});
+	return count;
+};
+
+const getChannelsOnSearch = (
+	searchString: string,
+	channels: Channel[],
+	posts: Post[],
+): Channel[] => {
+	const searchWords = searchString.split(' ');
+	const matchedChannels = channels.filter((channel) => {
+		for (let i = 0; i < searchWords.length; i++) {
+			const searchWord = searchWords[i];
+			if (channel.name.toLowerCase().includes(searchWord.toLowerCase())) return true;
+		}
+		return false;
+	});
+
+	matchedChannels.sort((a, b) => getPostCountInChannel(b.id, posts) - getPostCountInChannel(a.id, posts));
+	return matchedChannels;
+};
 
 const channelCellElement = (channel: Channel, isHovered: boolean): JSX.Element => (
 	<div style={{
@@ -125,7 +149,7 @@ export default class App extends React.Component<Props, State> {
 
 				<div style={styles.postDraftSection}>
 					<SearchDropdown<Channel>
-						getItemsData={(search) => getChannelsOnSearch(search, this.state.channels)}
+						getItemsData={(search) => getChannelsOnSearch(search, this.state.channels, this.state.posts)}
 						getItemKey={(channel) => channel.id}
 						getElement={(channel, isHovered) => channelCellElement(channel, isHovered)}
 						getTitle={(channel) => channel.name}
