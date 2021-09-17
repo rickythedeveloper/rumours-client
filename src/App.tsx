@@ -6,6 +6,7 @@ import { GetResponse, PostResponse } from './models/api';
 import PostsTable from './components/PostsTable';
 import ChannelDropdown from './components/ChannelDropdown';
 import { SERVER_URL } from './constants';
+import SearchDropdown from './components/generic/SearchDropdown.tsx';
 
 interface Props {
 	style?: CSSProperties;
@@ -95,6 +96,11 @@ export default class App extends React.Component<Props, State> {
 
 		return (
 			<div className="App" style={{ ...styles.container, ...this.props.style }}>
+				<SearchDropdown<{stuff: number}>
+					getItemsData={(search) => Array(10).fill({ stuff: 1 })}
+					getItemKey={(itemData) => itemData.stuff}
+					getElement={(itemData) => <div>{itemData.stuff}</div>}
+				/>
 				<h1>rumours</h1>
 				<PostsTable posts={shownPosts} />
 
